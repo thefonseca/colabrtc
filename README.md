@@ -6,12 +6,12 @@ from your machine to a Google Colab instance using
 `Web Real-Time Communication (WebRTC)`. It is built on top of
 [aiortc](https://github.com/aiortc/aiortc).
 
-The motivation behind this project was to to learn about WebRTC
+The motivation behind this project was to learn about WebRTC
  and because an efficient implementation of this kind of communication
  could be useful to prototype Deep Learning models without a local
  GPU. 
 
- How to use ``colabrtc``?
+ How to use ``ColabRTC``?
 ------------------------
 
 The API allows one to create a `ColabCall`, which consists of a
