@@ -11,9 +11,34 @@ var PeerUI = function(room, container_id) {
         peerDiv = document.createElement('div');
         document.body.appendChild(peerDiv);
     }
-    
+
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `
+        .loader {
+          position: absolute;
+          left: 38%;
+          top: 60%;
+          z-index: 1;
+          width: 50px;
+          height: 50px;
+          margin: -75px 0 0 -75px;
+          border: 16px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 16px solid #3498db;
+          -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    `;
+    document.getElementsByTagName('head')[0].appendChild(style);
+
     peerDiv.style.width = '70%';
-    
+
     // Define video elements.
     const videoDiv = document.createElement('div');
     videoDiv.style.display = 'none';
@@ -29,7 +54,11 @@ var PeerUI = function(room, container_id) {
     remoteView.width = 320;
     videoDiv.appendChild(localView);
     videoDiv.appendChild(remoteView);
-    
+    const loader = document.createElement('div');
+    loader.style.display = 'none';
+    loader.className = 'loader';
+    videoDiv.appendChild(loader);
+
     // Logs a message with the id and size of a video element.
     function logVideoLoaded(event) {
         const video = event.target;
@@ -41,6 +70,7 @@ var PeerUI = function(room, container_id) {
         remoteView.style.display = 'block';
         remoteView.style.width = '100%';
         remoteView.style.height = 'auto';
+        loader.style.display = 'none';
     }
 
     //localView.addEventListener('loadedmetadata', logVideoLoaded);
@@ -53,45 +83,46 @@ var PeerUI = function(room, container_id) {
     const startButton = document.createElement('button');
     //const joinButton = document.createElement('button');
     const hangupButton = document.createElement('button');
-    startButton.textContent = 'Start';
+    startButton.textContent = 'Join room: ' + room;
     //joinButton.textContent = 'Join';
     hangupButton.textContent = 'Hangup';
     controlDiv.appendChild(startButton);
     //controlDiv.appendChild(joinButton);
     controlDiv.appendChild(hangupButton);
-    
+
     // Set up initial action buttons status: disable call and hangup.
     //callButton.disabled = true;
     hangupButton.style.display = 'none';
-    
+
     peerDiv.appendChild(videoDiv);
     peerDiv.appendChild(controlDiv);
-    
+
     this.localView = localView;
     this.remoteView = remoteView;
     this.peerDiv = peerDiv;
     this.videoDiv = videoDiv;
+    this.loader = loader;
     this.startButton = startButton;
     //this.joinButton = joinButton;
     this.hangupButton = hangupButton;
     this.constraints = constraints;
     this.room = room;
-    
+
     self = this;
     async function start() {
         await self.connect(this.room);
     }
-    
+
     // Handles hangup action: ends up call, closes connections and resets peers.
     async function hangup() {
         await self.disconnect();
     }
-    
+
     // Add click event handlers for buttons.
     this.startButton.addEventListener('click', start);
     //this.joinButton.addEventListener('click', join);
     this.hangupButton.addEventListener('click', hangup);
-    
+
 //     const workerCode = () => {
 //         onmessage = async function(e) {
 //             //const data = JSON.parse(e.data);
@@ -116,6 +147,7 @@ PeerUI.prototype.connect = async function(room) {
     this.localView.play();
     trace('Received local stream.');
 
+    this.loader.style.display = 'block';
     this.startButton.style.display = 'none';
     this.localView.style.width = '100%';
     this.localView.style.height = 'auto';
