@@ -11,6 +11,7 @@ import fire
 
 import torch
 import sys
+sys.path.insert(0, "/content/colabrtc/colabrtc")
 sys.path.insert(0, "/content/avatarify")
 sys.path.insert(0, "/content/avatarify/fomm")
 

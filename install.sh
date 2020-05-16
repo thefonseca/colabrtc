@@ -12,6 +12,6 @@ apt-get -qq install libavdevice-dev libavfilter-dev libopus-dev libvpx-dev \
  pkg-config libsrtp2-dev libavformat-dev libavcodec-dev libavutil-dev \
  libswscale-dev libswresample-dev  < /dev/null > /dev/null
 
-pip -qq install -r requirements.txt < /dev/null > /dev/null
+pip -qq install -r /content/colabrtc/requirements.txt < /dev/null > /dev/null
 
 echo 'ColabRTC setup complete!'
