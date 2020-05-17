@@ -193,6 +193,7 @@ PeerUI.prototype.disconnect = async function() {
 
     trace('Ending call.');
     this.localView.srcObject.getVideoTracks()[0].stop();
+    this.peerDiv.remove();
 };
 
 // Logs an action (text) and the time when it happened on the console.
