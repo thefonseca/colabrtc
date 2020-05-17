@@ -75,6 +75,7 @@ var PeerUI = function(room, container_id) {
         remoteView.style.width = '100%';
         remoteView.style.height = 'auto';
         loader.style.display = 'none';
+        fullscreenButton.style.display = 'inline';
     }
 
     //localView.addEventListener('loadedmetadata', logVideoLoaded);
@@ -85,18 +86,19 @@ var PeerUI = function(room, container_id) {
     const controlDiv = document.createElement('div');
     controlDiv.style.textAlign = 'center';
     const startButton = document.createElement('button');
-    //const joinButton = document.createElement('button');
+    const fullscreenButton = document.createElement('button');
     const hangupButton = document.createElement('button');
     startButton.textContent = 'Join room: ' + room;
-    //joinButton.textContent = 'Join';
+    fullscreenButton.textContent = 'Fullscreen';
     hangupButton.textContent = 'Hangup';
     controlDiv.appendChild(startButton);
-    //controlDiv.appendChild(joinButton);
+    controlDiv.appendChild(fullscreenButton);
     controlDiv.appendChild(hangupButton);
 
     // Set up initial action buttons status: disable call and hangup.
     //callButton.disabled = true;
     hangupButton.style.display = 'none';
+    fullscreenButton.style.display = 'none';
 
     peerDiv.appendChild(videoDiv);
     peerDiv.appendChild(controlDiv);
@@ -107,7 +109,7 @@ var PeerUI = function(room, container_id) {
     this.videoDiv = videoDiv;
     this.loader = loader;
     this.startButton = startButton;
-    //this.joinButton = joinButton;
+    this.fullscreenButton = fullscreenButton;
     this.hangupButton = hangupButton;
     this.constraints = constraints;
     this.room = room;
@@ -122,9 +124,22 @@ var PeerUI = function(room, container_id) {
         await self.disconnect();
     }
 
+    function openFullscreen() {
+      let elem = remoteView;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.mozRequestFullScreen) { /* Firefox */
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { /* IE/Edge */
+        elem.msRequestFullscreen();
+      }
+    }
+
     // Add click event handlers for buttons.
     this.startButton.addEventListener('click', start);
-    //this.joinButton.addEventListener('click', join);
+    this.fullscreenButton.addEventListener('click', openFullscreen);
     this.hangupButton.addEventListener('click', hangup);
 };
 
@@ -148,19 +163,19 @@ PeerUI.prototype.connect = async function(room) {
       // Resize the output to fit the video element.
       google.colab.output.setIframeHeight(document.documentElement.scrollHeight, true);
     }
-    
+
     try {
         //this.joinButton.style.display = 'none';
         this.hangupButton.style.display = 'inline';
-        
+
         trace('Starting call.');
         this.startTime = window.performance.now();
-        
+
         this.peer = new Peer();
         await this.peer.connect(this.room);
         //const obj = JSON.stringify([this.peer.connect, this.room]);
         //this.worker.postMessage([this.peer, this.room]);
-        
+
         this.peer.pc.ontrack = ({track, streams}) => {
             // once media for a remote track arrives, show it in the remote video element
             track.onunmute = () => {
@@ -172,13 +187,13 @@ PeerUI.prototype.connect = async function(room) {
                 this.remoteView.play();
             };
         };
-        
+
         const localStream = this.localView.srcObject;
         console.log('adding local stream');
         await this.peer.addLocalStream(localStream);
-        
+
         await this.peer.waitMessage();
-        
+
     } catch (err) {
         console.error(err);
     }
@@ -189,6 +204,7 @@ PeerUI.prototype.disconnect = async function() {
     this.startButton.style.display = 'inline';
     //this.joinButton.style.display = 'inline';
     this.hangupButton.style.display = 'none';
+    this.fullscreenButton.style.display = 'none';
     this.videoDiv.style.display = 'none';  
 
     trace('Ending call.');
