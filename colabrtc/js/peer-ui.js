@@ -37,6 +37,10 @@ var PeerUI = function(room, container_id) {
     `;
     document.getElementsByTagName('head')[0].appendChild(style);
 
+    var adapter = document.createElement('script');
+    adapter.setAttribute('src','https://webrtc.github.io/adapter/adapter-latest.js');
+    document.getElementsByTagName('head')[0].appendChild(adapter);
+
     peerDiv.style.width = '70%';
 
     // Define video elements.
@@ -122,21 +126,6 @@ var PeerUI = function(room, container_id) {
     this.startButton.addEventListener('click', start);
     //this.joinButton.addEventListener('click', join);
     this.hangupButton.addEventListener('click', hangup);
-
-//     const workerCode = () => {
-//         onmessage = async function(e) {
-//             //const data = JSON.parse(e.data);
-//             console.log(e.data);
-//             console.log(e.data[0].connect);
-//             const [async_fn, ...args] = e.data;
-//             await async_fn(...args);
-//             //self.postMessage('msg from worker');
-//         };
-//     }
-//     const workerCodeStr = workerCode.toString().replace(/^[^{]*{\s*/,'').replace(/\s*}[^}]*$/,'');
-//     console.log(workerCodeStr);
-//     const workerBlob = new Blob([workerCodeStr], { type: "text/javascript" })
-//     this.worker = new Worker(window.URL.createObjectURL(workerBlob));
 };
 
 
