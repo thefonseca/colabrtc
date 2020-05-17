@@ -42,7 +42,14 @@ Peer.prototype.connect = async function(room, configuration) {
       try {
         trace('making offer');
         this.makingOffer = true;
-        await this.pc.setLocalDescription();
+        try {
+          await this.pc.setLocalDescription();
+        } catch (error) {
+          // Some browsers do not support implicit descriptions yet
+          // More info here:
+          // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/setLocalDescription#Browser_compatibility
+          // In this case, this peer will only wait for an offer
+        }
         await this.signaling.send(pc.localDescription);
       } catch (err) {
         console.error(err);
@@ -50,10 +57,10 @@ Peer.prototype.connect = async function(room, configuration) {
         this.makingOffer = false;
       }
     };
-    
+
     // The perfect negotiation logic, separated from the rest of the application
     // from https://w3c.github.io/webrtc-pc/#perfect-negotiation-example
-    
+
     this.signaling.onmessage = async (message) => {
       try {
         if (message == null) {
@@ -70,10 +77,16 @@ Peer.prototype.connect = async function(room, configuration) {
           }
           await pc.setRemoteDescription(message); // SRD rolls back as needed
           if (message.type == "offer") {
-            await pc.setLocalDescription();
+            try {
+              await pc.setLocalDescription();
+            } catch (error) {
+              // Some browsers do not support implicit descriptions yet
+              // More info here:
+              // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/setLocalDescription#Browser_compatibility
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
+            }
             await signaling.send(this.pc.localDescription);
-            // The Python peer does not send candidates, so we do not expect more messages
-            //clearTimeout(this.timeout);
           }
         } else if (message.type == 'candidate') {
           try {
